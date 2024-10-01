@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.ServiceModel;
@@ -18,6 +19,9 @@ public interface IService
 	string Meteo_GetTemperature();
 
 	[OperationContract]
+	DataSet Meteo_GetTemperatureDay(string dateTempSearch);
+
+    [OperationContract]
 	void Meteo_GetTemperatureByDate(string dateTempSearch, out string temp);
 
 

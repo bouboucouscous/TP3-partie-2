@@ -9,6 +9,9 @@ using System.ServiceModel.Web;
 using System.Text;
 using System.Data.SqlClient;
 using System.Collections;
+using System.Data;
+using System.Data.Common;
+using System.Collections.ObjectModel;
 
 // REMARQUE : vous pouvez utiliser la commande Renommer du menu Refactoriser pour changer le nom de classe "Service" dans le code, le fichier svc et le fichier de configuration.
 public class Service : IService
@@ -64,8 +67,8 @@ public class Service : IService
 
 	public  void Meteo_GetTemperatureByDate(string dateTempSearch, out string temp)
     {
-        // format of date is	2023-09-23T13:12:02.000
-		//						yyyy-mm-ddThh:m:ss.ms
+        // format of date is	2023-09-23
+		//						yyyy-mm-dd
         string db = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\aybou\source\repos\TP3 partie 2\TP3 partie 2\App_Data\Database.mdf;Integrated Security=True;";
         string query = "SELECT * FROM [T_Data] WHERE [DateReleve] = (SELECT MAX([DateReleve]) FROM [T_Data] WHERE DateReleve < CAST(N'"+dateTempSearch+"' AS DateTime))";
 
@@ -89,6 +92,33 @@ public class Service : IService
                 throw new Exception(sqlEx.Message);
             }
         }
+    }
 
+    public DataSet Meteo_GetTemperatureDay(string dateTempSearch)
+    {
+        DataSet dataSet = new DataSet();
+
+        string db = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\aybou\source\repos\TP3 partie 2\TP3 partie 2\App_Data\Database.mdf;Integrated Security=True;";
+        string query = "SELECT * FROM [T_Data] WHERE [DateReleve] > CAST(N'" + dateTempSearch + "' AS DateTime) AND [DateReleve] < DateAdd(d, 1, CAST(N'" + dateTempSearch + "' AS DateTime))";
+
+
+        SqlConnection sqlConnection = new SqlConnection(db);
+        sqlConnection.Open();
+
+        using (SqlConnection databaseConnection = new SqlConnection(db))
+        {
+            try
+            {
+                databaseConnection.Open();
+                SqlDataAdapter adapter = new SqlDataAdapter(query, databaseConnection);
+                adapter.Fill(dataSet);
+                databaseConnection.Close();
+            }
+            catch (SqlException sqlEx)
+            {
+                throw new Exception(sqlEx.Message);
+            }
+        }
+        return dataSet;
     }
 }
